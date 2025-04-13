@@ -3,8 +3,6 @@
 // Execute `rustlings hint threads3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
-
 use std::sync::mpsc;
 use std::sync::Arc;
 use std::thread;
@@ -31,18 +29,20 @@ fn send_tx(q: Queue, tx: mpsc::Sender<u32>) -> () {
     let qc1 = Arc::clone(&qc);
     let qc2 = Arc::clone(&qc);
 
+    let tx1 = tx.clone();
     thread::spawn(move || {
         for val in &qc1.first_half {
             println!("sending {:?}", val);
-            tx.send(*val).unwrap();
+            tx1.send(*val).unwrap();
             thread::sleep(Duration::from_secs(1));
         }
     });
 
+    let tx2 = tx.clone();
     thread::spawn(move || {
         for val in &qc2.second_half {
             println!("sending {:?}", val);
-            tx.send(*val).unwrap();
+            tx2.send(*val).unwrap();
             thread::sleep(Duration::from_secs(1));
         }
     });
@@ -56,8 +56,14 @@ fn main() {
     send_tx(queue, tx);
 
     let mut total_received: u32 = 0;
+    /*
+    在 Rust 中，std::sync::mpsc::Receiver 实现了 Iterator trait，
+    这意味着你可以直接在 for 循环中迭代 Receiver，而不需要显式调用 recv() 方法。
+    每次迭代时，for 循环会自动调用 recv() 方法来获取通道中的下一个消息。
+    */ 
     for received in rx {
         println!("Got: {}", received);
+        println!("Got2: {:?}", received);
         total_received += 1;
     }
 
