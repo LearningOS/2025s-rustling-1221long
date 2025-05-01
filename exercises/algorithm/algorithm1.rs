@@ -70,15 +70,94 @@ impl<T> LinkedList<T> {
         }
     }
 	
-    pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+
+    /*
+    logic:
+    1. require the t can be ord and  clone.
+    2. use while let (node1, node2) to get the 2 list start node. 
+    3. if one list is over, while will be over.
+    4. add the left nodes.
+    */
+
+    pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self
+    where
+        T: Ord + Clone,
+    {
+        let mut merged = LinkedList::new();
+        let mut current_a = list_a.start;
+        let mut current_b = list_b.start;
+
+        while let (Some(node_a), Some(node_b)) = (current_a, current_b) {
+            if unsafe { &(*node_a.as_ptr()).val } <= unsafe { &(*node_b.as_ptr()).val } {
+                // add one node
+                merged.add(unsafe { (*node_a.as_ptr()).val.clone() });
+                // move the start to the next
+                current_a = unsafe { (*node_a.as_ptr()).next };
+            } else {
+                merged.add(unsafe { (*node_b.as_ptr()).val.clone() });
+                current_b = unsafe { (*node_b.as_ptr()).next };
+            }
         }
-	}
+
+        // add the left node to the merge
+        while let Some(node) = current_a {
+            merged.add(unsafe { (*node.as_ptr()).val.clone() });
+            current_a = unsafe { (*node.as_ptr()).next };
+        }
+
+        while let Some(node) = current_b {
+            merged.add(unsafe { (*node.as_ptr()).val.clone() });
+            current_b = unsafe { (*node.as_ptr()).next };
+        }
+
+        merged
+    }
+
+    // pub fn merge(&mut self, list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	// {
+    //     let concat_list = self.concat(list_a,list_b);
+
+    //     let len = concat_list.length;
+
+    //     for i in [0..len] {
+    //         let mut max_node = concat_list.start;
+    //         let mut tmp_node = concat_list.start;
+    //         while tmp_node.next != None {
+    //             if tmp_node.val < max_node.val {
+    //                 let tmp_v = max_node.val;
+    //                 max_node.val = tmp_node.val;
+    //                 tmp_node.val = tmp_v;
+    //                 max_node = tmp_node;
+    //             } else {
+    //                 max_node = tmp_node;
+    //             }
+    //             tmp_node = tmp_node.next;
+    //         }
+            
+    //     }
+    //     concat_list
+
+	// 	// //TODO
+	// 	// Self {
+    //     //     length: 0,
+    //     //     start: None,
+    //     //     end: None,
+    //     // }
+	// }
+
+    // fn concat(&mut self,list_a: LinkedList<T>, list_b:LinkedList<T>) -> Self {
+    //     let a_start = list_a.start;
+    //     let a_end = list_a.end;
+    //     let b_start = list_b.start;        
+    //     let b_end = list_b.end;        
+    //     let l = list_a.length + list_b.length;
+    //     unsafe { (*(a_end.unwrap()).as_ptr()).next = b_start; }
+    //     Self {
+    //         length: l,
+    //         start: a_start,
+    //         end: b_end,
+    //     }
+    // }
 }
 
 impl<T> Display for LinkedList<T>
